@@ -12,7 +12,7 @@ export interface StreamData {
 export const INITIAL_DATA: StreamData = {
   status: "LIVE",
   project: "StreamStatus Pro",
-  tech: ["React", "Tailwind", "Gemini"],
+  tech: ["React", "Tailwind", "TypeScript"],
   message: "Refactoring the UI for maximum performance",
   viewers: 128
 };
