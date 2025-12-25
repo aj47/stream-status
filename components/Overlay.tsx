@@ -1,91 +1,59 @@
 
 import React from 'react';
-import { StreamData } from '../types';
+import { StreamData, TaskStatus } from '../types';
 
 interface OverlayProps {
   data: StreamData;
 }
 
 export const Overlay: React.FC<OverlayProps> = ({ data }) => {
-  const getStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'LIVE': return 'from-red-600 to-red-400';
-      case 'BRB': return 'from-orange-600 to-amber-400';
-      case 'DEBUGGING': return 'from-blue-600 to-cyan-400';
-      case 'OFFLINE': return 'from-neutral-700 to-neutral-500';
-      default: return 'from-emerald-600 to-green-400';
+  const getStatusStyle = (status: TaskStatus) => {
+    switch (status) {
+      case 'done':
+        return { color: 'text-emerald-400', icon: '✓', bg: 'bg-emerald-500' };
+      case 'building':
+        return { color: 'text-amber-400', icon: '▸', bg: 'bg-amber-500', pulse: true };
+      case 'todo':
+        return { color: 'text-neutral-500', icon: '○', bg: 'bg-neutral-600' };
     }
   };
 
-  const getStatusBg = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'LIVE': return 'bg-red-500';
-      case 'BRB': return 'bg-amber-500';
-      default: return 'bg-emerald-500';
-    }
-  };
+  const activeTask = data.tasks.find(t => t.status === 'building');
 
   return (
-    <div className="w-fit min-w-[320px] max-w-lg bg-black/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden shadow-2xl font-mono p-1">
-      {/* Top Bar with Status and Viewers */}
-      <div className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-t-lg">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-2 w-2">
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${getStatusBg(data.status)}`}></span>
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${getStatusBg(data.status)}`}></span>
-          </div>
-          <span className={`text-[10px] font-bold tracking-[0.2em] uppercase bg-gradient-to-r ${getStatusColor(data.status)} bg-clip-text text-transparent`}>
-            {data.status}
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-           <svg className="w-3 h-3 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-           </svg>
-           <span className="text-[10px] text-neutral-400 font-bold">{data.viewers}</span>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="p-4 space-y-4">
-        {/* Project Section */}
-        <div>
-          <label className="text-[9px] text-neutral-500 uppercase tracking-widest block mb-1">Current Task</label>
-          <h2 className="text-lg font-bold text-white leading-tight uppercase tracking-tight">
-            {data.project}
-          </h2>
-        </div>
-
-        {/* Message Section */}
-        <div className="bg-neutral-900/40 p-2 border-l-2 border-white/10">
-          <p className="text-[11px] text-neutral-300 italic">
-            &gt; {data.message}
-          </p>
-        </div>
-
-        {/* Tech Stack Tags */}
-        <div className="flex flex-wrap gap-2 pt-1">
-          {data.tech.map((tag, i) => (
-            <span 
-              key={`${tag}-${i}`} 
-              className="text-[9px] px-2 py-0.5 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-sm uppercase font-bold tracking-tighter"
+    <div className="w-fit min-w-[400px] bg-black/90 backdrop-blur-md border-2 border-white/10 rounded-xl overflow-hidden shadow-2xl font-mono">
+      {/* Task List */}
+      <div className="p-6 space-y-3">
+        {data.tasks.map((task, i) => {
+          const style = getStatusStyle(task.status);
+          return (
+            <div
+              key={i}
+              className={`flex items-center gap-4 ${task.status === 'done' ? 'opacity-50' : ''}`}
             >
-              {tag}
-            </span>
-          ))}
-        </div>
+              <span className={`text-xl w-8 ${style.color} ${style.pulse ? 'animate-pulse' : ''}`}>
+                {style.icon}
+              </span>
+              <span className={`text-[22px] ${task.status === 'building' ? 'text-white' : 'text-neutral-400'} ${task.status === 'done' ? 'line-through' : ''}`}>
+                {task.name}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Footer Branding */}
-      <div className="px-3 py-1.5 flex items-center justify-between border-t border-white/5 opacity-40">
-        <span className="text-[8px] text-neutral-500 uppercase tracking-[0.3em]">Hacker.OS</span>
-        <div className="flex gap-1">
-          <div className="w-1 h-1 rounded-full bg-neutral-700"></div>
-          <div className="w-1 h-1 rounded-full bg-neutral-700"></div>
-          <div className="w-1 h-1 rounded-full bg-neutral-700"></div>
-        </div>
+      {/* Footer */}
+      <div className="px-6 py-3 border-t border-white/5 flex items-center justify-between">
+        <span className="text-base text-neutral-600 uppercase tracking-widest">sys.tasks</span>
+        {activeTask && (
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+            </span>
+            <span className="text-base text-amber-400/70 uppercase">building</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,18 +1,20 @@
 
-export type StreamStatusType = 'LIVE' | 'OFFLINE' | 'BRB' | 'CODING' | 'DEBUGGING';
+export type TaskStatus = 'done' | 'building' | 'todo';
+
+export interface Task {
+  name: string;
+  status: TaskStatus;
+}
 
 export interface StreamData {
-  status: StreamStatusType;
-  project: string;
-  tech: string[];
-  message: string;
-  viewers: number;
+  tasks: Task[];
 }
 
 export const INITIAL_DATA: StreamData = {
-  status: "LIVE",
-  project: "StreamStatus Pro",
-  tech: ["React", "Tailwind", "TypeScript"],
-  message: "Refactoring the UI for maximum performance",
-  viewers: 128
+  tasks: [
+    { name: "Auth system", status: "done" },
+    { name: "API endpoints", status: "done" },
+    { name: "Real-time sync", status: "building" },
+    { name: "Deploy to prod", status: "todo" }
+  ]
 };
